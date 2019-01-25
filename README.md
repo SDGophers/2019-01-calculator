@@ -124,29 +124,35 @@ operations of a language. In our langugage this is simple arithmatic such as
 adding, subtracting, etc. In other languges this can get as abstract as creating
 classes, memory management, and os iteraction.
 
-Our VM will consist of a single memory location for the result and two registers
+Our VM will consist of a stack for results and two registers
 for executing operations. One register for the op code and another for the argument.
 The code might be easier to understand:
 
 ```go
-// https://play.golang.org/p/ri1CAlK_3ns
+// https://play.golang.org/p/IC_DHTxTGyp
 type VM struct {
-	Result int
+	Result []int
 }
 
-// for speed purposes, one might change the type of arg
-// to be an unsafe.Pointer
 func (vm *VM) Exec(opcode int, arg interface{}) error {
-	switch opcode:
+	switch opcode {
 	case OpAdd:
 		argi, ok := arg.(int)
 		if !ok {
-			return fmt.Errorf("bad arg")
+			return fmt.Errorf("bad arg %v", arg)
 		}
-		vm.Result += argi
+
+		vm.Result[len(vm.Result)-1] += argi
+		return nil
+	case OpPush:
+		argi, ok := arg.(int)
+		if !ok {
+			return fmt.Errorf("bad arg %v", arg)
+		}
+		vm.Result = append(vm.Result, argi)
 		return nil
 	default:
-		return fmt.Errorf("bad opcode")
+		return fmt.Errorf("bad opcode %d", opcode)
 	}
 }
 ```
